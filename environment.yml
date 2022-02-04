@@ -1,0 +1,12 @@
+name: beegfsmonitor
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - python
+  - pip
+  - pyqt
+  - matplotlib
+  - pandas
+  - pip:
+      - influxdb
