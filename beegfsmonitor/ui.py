@@ -112,7 +112,19 @@ class App(QtWidgets.QMainWindow):
             ax.set_title(f"{field}: no data")
         else:
             rollup.plot(ax=ax)
+            self.set_tickmarks(ax, df)
             ax.set_title(field)
+
+    def set_tickmarks(self, ax, df):
+        ax.set_xlabel("")
+        tz_name = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+        tmin = df["time"].min().to_pydatetime().astimezone(tz_name)
+        tmax = df["time"].max().to_pydatetime().astimezone(tz_name)
+        tdiff = tmax - tmin
+        n_labels = len(ax.get_xticks())
+        label_granularity = tdiff / (n_labels - 1)
+        times = [tmin + label_granularity * i for i in range(n_labels)]
+        ax.set_xticklabels(["%d:%02d:%02d" % (t.hour, t.minute, t.second) for t in times])
 
     def time_group(self, df):
         if self.aday.isChecked():
@@ -148,6 +160,7 @@ class App(QtWidgets.QMainWindow):
             rollup = subdf.groupby(gb)
             (rollup["stat"].sum() / nsec ).plot(ax=ax)
             ax.set_title(k)
+            self.set_tickmarks(ax, subdf)
 
     def plot_storage_ops_by_node(self):
         df = self.monitor.query(Tables.STORAGE_CLIENT_OPS_BY_NODE)
@@ -165,6 +178,7 @@ class App(QtWidgets.QMainWindow):
             (rollup["B-wr"].sum() / sec ).plot(ax=ax, label="B-wr")
             ax.legend()
             ax.set_title(k)
+            self.set_tickmarks(ax, subdf)
 
 
 def main():
